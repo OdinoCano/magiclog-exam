@@ -42,7 +42,6 @@ function App() {
 
       const response = await api.post('/auth/validate');
       if (response.data) {
-        console.log(response.data);
         setIsAuthenticated(true);
         setUserRole(response.data.role);
         const role = response.data.role;

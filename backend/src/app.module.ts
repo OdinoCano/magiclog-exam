@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module'; // Importa AuthModule
+import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
 import { User } from './users/users.entity';
@@ -32,14 +32,8 @@ import config from './config';
         database: configService.get<string>('config.database'),
         entities: [User, Product, Cart],
         synchronize: configService.get<boolean>('config.synchronize'),
-        //logging: true,
       })
     }),
-    //JwtModule.register({
-    //  //global: true,
-    //  secret: process.env.JWT_SECRET,
-    //  signOptions: { expiresIn: '1h' },
-    //}),
     AuthModule, // Importa AuthModule
     CartModule,
     ProductsModule,

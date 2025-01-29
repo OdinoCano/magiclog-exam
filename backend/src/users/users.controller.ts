@@ -19,10 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { Role } from 'src/auth/enums/role.enum';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
-
-interface AuthenticatedRequest extends Request {
-  user: User; // Define el tipo del usuario
-}
+import { AuthenticatedRequest } from 'src/auth/interfaces/auth.interface';
 
 @UseGuards(JwtAuthGuard)// Protege las rutas con el guard de autenticación
 @ApiTags('Users') // Agrupa los endpoints bajo la etiqueta "users"

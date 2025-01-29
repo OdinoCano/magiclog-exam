@@ -23,8 +23,8 @@ export class CartService {
     }
 
     const cartItem = this.cartRepository.create({
-      user,
-      product,
+      //user,
+      //product,
       quantity,
     });
 
@@ -32,10 +32,10 @@ export class CartService {
   }
 
   // Obtener los productos del carrito
-  async getCart(user: User): Promise<Cart[]> {
-    return this.cartRepository.find({
-      where: { user: { id: user.id } },
-      relations: ['product'],
-    });
-  }
+  //async getCart(user: User): Promise<Cart[]> {
+  //  return this.cartRepository.find({
+  //    where: { user: { id: user.id } },
+  //    relations: ['product'],
+  //  });
+  //}
 }

@@ -1,83 +1,116 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  UseGuards,
-  Req,
-  Request,
-  ForbiddenException,
-  SetMetadata,
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Put, 
+  Delete, 
+  Body, 
+  Param, 
+  Query, 
+  UseGuards, 
+  Req, 
+  ParseIntPipe, 
+  HttpStatus,
+  Logger
 } from '@nestjs/common';
-import { ProductsService } from './products.service';
-import { RolesGuard } from '../auth/guards/roles/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { CreateProductDto } from './dto/create-product.dto';
-import { ProductFiltersDto } from './dto/product-filters.dto';
-import { User } from '../users/users.entity';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiBody,
-  ApiQuery,
+import { 
+  ApiTags, 
+  ApiOperation, 
+  ApiResponse, 
+  ApiBearerAuth, 
+  ApiQuery, 
+  ApiParam 
 } from '@nestjs/swagger';
-import { Role } from 'src/auth/enums/role.enum';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth/jwt-auth.guard';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { CreateProductDto } from './dto/create-product.dto';
+import { AuthenticatedRequest } from 'src/auth/interfaces/auth.interface';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { ProductFiltersDto } from './dto/product-filters.dto';
+import { Role } from 'src/auth/enums/role.enum';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductRepository } from './repositories/product.repository';
 
-interface AuthenticatedRequest extends Request {
-  user: User; // Define el tipo del usuario
-}
-
-@ApiTags('Products') // Agrupa los endpoints bajo la etiqueta "products"
-@ApiBearerAuth('JWT-auth') // Habilita la autenticación JWT en Swagger
+@ApiTags('Products')
 @Controller('products')
+@ApiBearerAuth()
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  private readonly logger = new Logger(ProductsController.name);
 
-  @Public()
-  @Get()
-  @UseGuards(RolesGuard)
-  @ApiOperation({ summary: 'Obtener todos los productos' })
-  @ApiQuery({ name: 'filters', type: ProductFiltersDto, required: false })
-  @ApiResponse({ status: 200, description: 'Lista de productos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 403, description: 'Prohibido' })
-  findAll(
-    @Query() filters: ProductFiltersDto,
-    @Req() request: AuthenticatedRequest,
-  ) {
-    const user = request.user as User;
-    
-    if (!user) {
-      return this.productsService.findAllPublic(filters);
-    }
+  constructor(
+    private readonly productRepository: ProductRepository
+  ) {}
 
-    if (user.role === 'seller' && filters?.sellerId && filters.sellerId !== user.id) {
-      throw new ForbiddenException('No tienes permiso para filtrar por otros vendedores');
-    }
-    
-    return this.productsService.findAll(user, filters);
-  }
-
-  @Roles(Role.Seller)
-  @UseGuards(RolesGuard)
-  @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiOperation({ summary: 'Crear un nuevo producto' })
-  @ApiBody({ type: CreateProductDto })
-  @ApiResponse({ status: 201, description: 'Producto creado exitosamente' })
-  @ApiResponse({ status: 400, description: 'Datos inválidos' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 403, description: 'Prohibido (requiere rol de vendedor)' })
-  create(
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.Admin)
+  @ApiOperation({ summary: 'Create a new product' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Product created successfully' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid input' })
+  async create(
     @Body() createProductDto: CreateProductDto,
     @Req() request: AuthenticatedRequest,
   ) {
-    const user = request.user as User; // Extrae el usuario autenticado
-    return this.productsService.create(createProductDto, user);
+    this.logger.log(`Creating product for user ${request.user.id}`);
+    return this.productRepository.create(createProductDto, request.user);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.Admin, Role.User)
+  @ApiOperation({ summary: 'Get all products with filters' })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiQuery({ name: 'sku', required: false, type: String })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number })
+  @ApiQuery({ name: 'seller', required: false, type: String })
+  async findAll(
+    @Query() filters: ProductFiltersDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    this.logger.log(`Fetching products for user ${request.user.id}`);
+    return this.productRepository.findAll(filters, request.user);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Seller, Role.Admin, Role.User)
+  @ApiOperation({ summary: 'Get product by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Product found' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Product not found' })
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    this.logger.log(`Fetching product ${id} for user ${request.user.id}`);
+    return this.productRepository.findOne(id);
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('seller', 'admin')
+  @ApiOperation({ summary: 'Update product by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    this.logger.log(`Updating product ${id} for user ${request.user.id}`);
+    return this.productRepository.update(id, updateProductDto, request.user);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('seller', 'admin')
+  @ApiOperation({ summary: 'Delete product by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    this.logger.log(`Deleting product ${id} for user ${request.user.id}`);
+    return this.productRepository.remove(id, request.user);
   }
 }

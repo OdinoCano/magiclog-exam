@@ -5,13 +5,12 @@ import api from '../services/api';
 import { Product } from '../types/Product';
 
 const HomePage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]); // Tipar el estado
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
   useEffect(() => {
-    // Cargar todos los productos al inicio
     fetchProducts();
   }, []);
 
@@ -28,7 +27,8 @@ const HomePage: React.FC = () => {
     try {
       const response = await api.get('/products', {
         params: {
-          searchTerm,
+          name: searchTerm,
+          sku: searchTerm,
           minPrice: minPrice || undefined,
           maxPrice: maxPrice || undefined,
         },
@@ -39,9 +39,16 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleClean = () => {
+    setSearchTerm('');
+    setMinPrice('');
+    setMaxPrice('');
+    fetchProducts();
+  };
+
   return (
-    <Container>
-      <Typography variant="h3" gutterBottom>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Typography variant="h3" gutterBottom align="center" fontWeight={600}>
         Bienvenido al Marketplace
       </Typography>
 
@@ -55,7 +62,7 @@ const HomePage: React.FC = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </Grid>
-        <Grid size={{xs: 12, sm: 4}} component="div">
+        <Grid size={{xs: 12, sm: 3}} component="div">
           <TextField
             fullWidth
             label="Precio mínimo"
@@ -64,7 +71,7 @@ const HomePage: React.FC = () => {
             onChange={(e) => setMinPrice(e.target.value)}
           />
         </Grid>
-        <Grid size={{xs: 12, sm: 2}} component="div">
+        <Grid size={{xs: 12, sm: 3}} component="div">
           <TextField
             fullWidth
             label="Precio máximo"
@@ -79,33 +86,28 @@ const HomePage: React.FC = () => {
           </Button>
         </Grid>
         <Grid size={{xs: 12, sm: 2}} component="div">
-          <Button variant="outlined" onClick={fetchProducts} fullWidth>
+          <Button variant="outlined" onClick={handleClean} fullWidth>
             Limpiar
           </Button>
         </Grid>
       </Grid>
 
       {/* Lista de productos */}
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         {products.map((product) => (
-          <Grid key={product?.sku} size={{xs: 12, sm: 6, md: 4}} component="div">
-            <Card>
-              <CardMedia
-                component="img"
-                height="140"
-                image="https://via.placeholder.com/150" // Imagen de ejemplo
-                alt={product?.name}
-              />
+          <Grid key={product?.sku} size={{xs: 12, sm: 6, md:4}} component="div">
+            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+              {
+              //product?.imageUrl && (
+              //  <CardMedia component="img" height="180" image={product.imageUrl} alt={product.name} />
+              //)
+              }
               <CardContent>
-                <Typography variant="h6">{product?.name}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  SKU: {product?.sku}
-                </Typography>
-                <Typography variant="body1">Cantidad: {product?.quantity}</Typography>
-                <Typography variant="body1">Precio: ${product?.price}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Vendedor: {product?.seller?.email}
-                </Typography>
+                <Typography variant="h6" fontWeight={600}>{product?.name}</Typography>
+                <Typography variant="body2" color="textSecondary">SKU: {product?.sku}</Typography>
+                <Typography variant="body1" fontWeight={500}>Cantidad: {product?.quantity}</Typography>
+                <Typography variant="body1" fontWeight={500} color="primary">Precio: ${product?.price}</Typography>
+                <Typography variant="body2" color="textSecondary">Vendedor: {product?.seller?.email || 'Desconocido'}</Typography>
               </CardContent>
             </Card>
           </Grid>

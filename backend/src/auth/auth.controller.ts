@@ -7,8 +7,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from '../users/dto/register.dto';
-import { LoginDto } from '../users/dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -19,10 +19,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth/refresh-jwt-auth.guard';
 import { User } from 'src/users/users.entity';
 import { Public } from './decorators/public.decorator';
 import { Request } from 'express';
-
-interface AuthenticatedRequest extends Request {
-  user: User; // Define el tipo del usuario
-}
+import { AuthenticatedRequest } from './interfaces/auth.interface';
 
 @Public()
 @ApiTags('Auth') // Agrupa los endpoints bajo la etiqueta "auth"

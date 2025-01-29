@@ -73,7 +73,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose, onLogin }) => {
       if (response.data.access_token) {
         localStorage.setItem('token', response.data.access_token);
         const payload = decodeJWT(response.data.access_token); // Decodifica el token
-        console.log(payload);
         const userRole = payload.role;
         const userName = payload.email;
         onLogin(userRole, userName);

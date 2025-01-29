@@ -1,28 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsInt, Min, IsPositive, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, Min, Matches, IsNumber } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Laptop', description: 'Nombre del producto' })
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   name: string;
 
   @ApiProperty({ example: 'ABC-123', description: 'SKU del producto' })
-  @IsNotEmpty()
   @IsString()
+  @IsNotEmpty()
   @Matches(/^[A-Z]{3}-\d{3}$/, {
     message: 'El SKU debe tener el formato ABC-123',
   })
   sku: string;
 
   @ApiProperty({ example: 10, description: 'Cantidad disponible' })
-  @IsNotEmpty()
-  @IsInt()
+  @IsNumber()
   @Min(0)
   quantity: number;
 
   @ApiProperty({ example: 1500, description: 'Precio del producto' })
-  @IsNotEmpty()
-  @IsPositive()
+  @IsNumber()
+  @Min(0)
   price: number;
 }

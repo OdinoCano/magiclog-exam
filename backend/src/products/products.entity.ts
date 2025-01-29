@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToMany, JoinColumn } from 'typeorm';
 import { User } from '../users/users.entity';
 import { Cart } from '../cart/cart.entity';
 
@@ -18,10 +18,13 @@ export class Product {
 
   @Column('decimal')
   price: number;
+  
+  @Column({ nullable: false })
+  sellerId: number;
 
-  @ManyToOne(() => User, (user) => user.products)
+  @ManyToOne(() => User, (user) => user.products, { nullable: false })
+  @JoinColumn({ name: 'sellerId' })
   seller: User;
-
-  @OneToMany(() => Cart, (cart) => cart.product)
-  cartItems: Cart[];
+  //@OneToMany(() => Cart, (cart) => cart.product)
+  //cartItems: Cart[];
 }

@@ -1,0 +1,44 @@
+const wsdlDefinition = `
+<definitions name="Service" targetNamespace="http://example.com/soap"
+  xmlns="http://schemas.xmlsoap.org/wsdl/"
+  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+  xmlns:tns="http://example.com/soap"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <message name="GetDataRequest">
+    <part name="param" type="xsd:string"/>
+  </message>
+
+  <message name="GetDataResponse">
+    <part name="result" type="xsd:string"/>
+  </message>
+
+  <portType name="ServicePort">
+    <operation name="GetData">
+      <input message="tns:GetDataRequest"/>
+      <output message="tns:GetDataResponse"/>
+    </operation>
+  </portType>
+
+  <binding name="ServiceBinding" type="tns:ServicePort">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetData">
+      <soap:operation soapAction="http://example.com/soap/GetData"/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+    </operation>
+  </binding>
+
+  <service name="Service">
+    <port name="ServicePort" binding="tns:ServiceBinding">
+      <soap:address location="http://localhost:3000/soap"/>
+    </port>
+  </service>
+</definitions>
+`;
+
+export default wsdlDefinition;

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsString, Min, Max } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsNumber, IsString, Min, Max, ValidateIf, IsEmail } from 'class-validator';
 
 export class ProductFiltersDto {
   @ApiProperty({ required: false })
@@ -24,8 +25,10 @@ export class ProductFiltersDto {
   @Max(1000000)
   maxPrice?: number;
 
-  @ApiProperty({ example: 1, required: false })
+  @ApiProperty({ required: false, description: 'Can be either seller ID (number) or email (string)' })
   @IsOptional()
-  @IsNumber()
-  sellerId?: number; // Para filtro de admin
+  @Transform(({ value }) => {
+    return !isNaN(+value) ? +value : value;
+  })
+  seller?: number | string;
 }

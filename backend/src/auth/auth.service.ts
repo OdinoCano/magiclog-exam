@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/users.entity'; // Importa la entidad User
 import { JwtService } from '@nestjs/jwt';
-import { RegisterDto } from '../users/dto/register.dto';
-import { LoginDto } from '../users/dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -58,7 +58,7 @@ export class AuthService {
     });
 
     this.usersRepository.save(user);
-    const payload = { email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -80,7 +80,7 @@ export class AuthService {
     }
 
     // Generar token JWT
-    const payload = { email: user.email, role: user.role };
+    const payload = { sub:user.id, email: user.email, role: user.role };
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '1d' });
     return {
       access_token: this.jwtService.sign(payload),
@@ -92,7 +92,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-    const payload = { email: user.email, role: user.role };
+    const payload = {id: user.id, email: user.email, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
     };

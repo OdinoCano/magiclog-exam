@@ -1,47 +1,94 @@
 # magiclog-exam
+
 ## Documentación
-http://139.177.100.32:3000/docs/ o DOCUMENTATION.md
+Puedes encontrar la documentación del proyecto en el siguiente enlace:
+- [Documentación Web](http://139.177.100.32:3000/docs/)
+- [DOCUMENTATION.md](DOCUMENTATION.md)
+
 ## Producción
-http://139.177.100.32/
+Para acceder al entorno de producción, visita:
+- [Producción](http://139.177.100.32/)
+
 ## Configuración
 ### Laravel Carro
-La configuración se encuentra en /laravel-carro/README.md
+Consulta la configuración en:
+- `/laravel-carro/README.md`
+
 ### Marketplace
-Ingresa a backend e instala las dependencias
-```bash
-cd backend
-# npm
-npm install
-# yarn
-yarn install
-```
-.env es para ejecutar el entorno de desarrollo. Para cambiar de entorno, modifica "NODE_ENV" por [dev, test, staging, prod].
-También se puede modificar las URI que tienen acceso y el puerto en "src/main.ts":
-```bash
-# CORS
-origin: 'http://localhost:3000',
-# Puerto
-await app.listen(3001);
-```
-##### Consejos
-Antes de ejecutar el proyecto verifica las reglas de tu firewall y mantener actualizado el Sistema Operativo.
+Para configurar el backend, sigue estos pasos:
+1. Accede a la carpeta del backend:
+   ```bash
+   cd backend
+   ```
+2. Instala las dependencias utilizando `npm` o `yarn`:
+   ```bash
+   # Usando npm
+   npm install
+   
+   # Usando yarn
+   yarn install
+   ```
+
+3. Configura el entorno en el archivo `.env`. Para cambiar el entorno de ejecución, edita la variable `NODE_ENV` con uno de los siguientes valores:
+   - `dev` (Desarrollo)
+   - `test` (Pruebas)
+   - `staging` (Pre-producción)
+   - `prod` (Producción)
+
+4. Puedes modificar las URI permitidas y el puerto en `src/main.ts`:
+   ```typescript
+   // Configurar CORS
+   origin: 'http://localhost:3000',
+   
+   // Configurar puerto de escucha
+   await app.listen(3001);
+   ```
+
+#### Consejos
+- Asegúrate de revisar las reglas de tu firewall antes de ejecutar el proyecto.
+- Mantén actualizado tu Sistema Operativo para evitar problemas de compatibilidad.
+
 ## Ejecutar Proyecto
-Para ejecutarlo en segundo plano y tener un control más eficiente te recomiendo instalar "pm2", toma en cuenta que es necesario agregar la ruta del programa al PATH.
+Para ejecutar la aplicación en segundo plano y tener un mejor control, se recomienda instalar `pm2`. Es importante agregar la ruta del programa al `PATH`.
+
+### Instalación de pm2
 ```bash
-# npm
+# Con npm
 npm install -g pm2
-# yarn
+
+# Con yarn
 yarn global add pm2
 ```
-Para ejecutar en segundo plano usa uno de estos comandos:
+
+### Ejecución en segundo plano
+Ejecuta el backend con alguno de los siguientes comandos:
 ```bash
-# pm2
+# Usando pm2
 pm2 start yarn --name "mi-app" -- start
-# Si marca error usa
+
+# Si hay errores, intenta con:
 pm2 start yarn --name "mi-app" --interpreter bash -- start
-# Creando un job con yarn
+
+# Usando un job con yarn
 yarn start &
-# Creando un job con npm
+
+# Usando un job con npm
 npm start &
-# En Windows se usan los mismos comandos
 ```
+
+### Consideraciones por sistema operativo
+#### Linux y macOS
+- Para evitar problemas de permisos, es recomendable ejecutar `npm install -g pm2` con `sudo` o configurar correctamente los permisos de usuario.
+- Usa `nohup` si necesitas persistencia tras cerrar la terminal:
+  ```bash
+  nohup yarn start &
+  ```
+
+#### Windows
+- Usa los mismos comandos indicados anteriormente.
+- Para ejecutar `pm2` en Windows, asegúrate de tener configurado el `PATH` correctamente.
+- Si necesitas ejecutar en segundo plano, usa `Start-Process` en PowerShell:
+  ```powershell
+  Start-Process -NoNewWindow -FilePath "npm" -ArgumentList "start"
+  ```
+
